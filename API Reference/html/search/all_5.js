@@ -1,6 +1,7 @@
 var searchData=
 [
   ['feedbackstyle',['FeedbackStyle',['../class_anyline_1_1_s_d_k_1_1_camera_1_1_visual_feedback_config.html#aeb0415b0c60fe8070207f7870cc6c033',1,'Anyline.SDK.Camera.VisualFeedbackConfig.FeedbackStyle()'],['../namespace_anyline_1_1_s_d_k_1_1_camera.html#aeebc28e1459efb84104b73de144e0990',1,'Anyline.SDK.Camera.FeedbackStyle()']]],
+  ['file',['File',['../namespace_anyline_1_1_s_d_k_1_1_modules_1_1_energy.html#a6f66509040a9c08394c80fbb74a63087a0b27918290ff5323bea1e3b78a9cf04e',1,'Anyline::SDK::Modules::Energy']]],
   ['fillcolor',['FillColor',['../class_anyline_1_1_s_d_k_1_1_camera_1_1_visual_feedback_config.html#a2e8869931befb2c7512e75d6c65f7eaf',1,'Anyline::SDK::Camera::VisualFeedbackConfig']]],
   ['flashalignment',['FlashAlignment',['../namespace_anyline_1_1_s_d_k_1_1_camera.html#a1b7d30989b48d83cb97f9fd2d2d94f29',1,'Anyline::SDK::Camera']]],
   ['flashmode',['FlashMode',['../namespace_anyline_1_1_s_d_k_1_1_camera.html#a74841198438c883468cf79cdb2ca40d2',1,'Anyline::SDK::Camera']]],
