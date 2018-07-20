@@ -67,6 +67,8 @@ namespace AnylineExamplesApp.Modules.Energy
                     AnylineScanView.CancelScanning();
                 AnylineScanView.ReleaseCameraInBackground();
             }
+
+            AnylineScanView.Dispose();
             AnylineScanView = null;
             doubleTariffCutoutView = null;
         }

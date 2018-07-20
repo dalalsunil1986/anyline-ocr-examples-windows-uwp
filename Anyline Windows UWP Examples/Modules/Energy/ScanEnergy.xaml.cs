@@ -18,6 +18,8 @@ using Windows.Storage.Pickers;
 using Windows.Graphics.Imaging;
 using System.Threading.Tasks;
 using Windows.Foundation;
+using Windows.Storage.FileProperties;
+using Anyline.SDK.Util;
 
 namespace AnylineExamplesApp.Modules.Energy
 {
@@ -69,6 +71,14 @@ namespace AnylineExamplesApp.Modules.Energy
             {
                 new MessageDialog(e.Message, "Exception").ShowAsync().AsTask().ConfigureAwait(false);
             }
+
+            // set this to always clean memory after every camera or processing cycle
+            // Warning: This may slow down performance.
+            ResourceManager.MemoryCollectionRate = MemoryCollectionRate.Always;
+
+            // Set this to "File" to receive the StorageFile in the PhotoCaptureListener callback
+            // instead of the AnylineImage.
+            AnylineScanView.PhotoCaptureTarget = PhotoCaptureTarget.File;
 
             // to handle camera callbacks
             AnylineScanView.CameraListener = this;
@@ -168,6 +178,8 @@ namespace AnylineExamplesApp.Modules.Energy
                 AnylineScanView.CancelScanning();
                 AnylineScanView.ReleaseCameraInBackground();
             }
+
+            AnylineScanView.Dispose();
             AnylineScanView = null;            
         }
         #endregion
@@ -291,34 +303,34 @@ namespace AnylineExamplesApp.Modules.Energy
             
         }
 
-// small helper method to save images
-public async Task SaveAnylineImageAsync(AnylineImage image, string suggestedName)
-{
-    if (image == null || image.Data == null) return;
-
-    // Create the picker object and set options
-    var savePicker = new Windows.Storage.Pickers.FileSavePicker();
-    savePicker.SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.Desktop;
-    // Dropdown of file types the user can save the file as
-    savePicker.FileTypeChoices.Add("png", new List<string> { ".png" });
-    // Default file name if the user does not type one in or select a file to replace
-    savePicker.SuggestedFileName = suggestedName;
-
-    StorageFile saveFile = await savePicker.PickSaveFileAsync();
-    if (saveFile != null)
-    {
-        using (IRandomAccessStream fileStream = await saveFile.OpenAsync(Windows.Storage.FileAccessMode.ReadWrite))
+        // small helper method to save images
+        public async Task SaveAnylineImageAsync(AnylineImage image, string suggestedName)
         {
-            // save the image as PNG
-            BitmapEncoder encode = await BitmapEncoder.CreateAsync(BitmapEncoder.PngEncoderId, fileStream);
-            byte[] buf = image.Data;
-            encode.SetPixelData(BitmapPixelFormat.Bgra8, BitmapAlphaMode.Ignore,
-                (uint)image.Width, (uint)image.Height, 96.0, 96.0, buf);
-            await encode.FlushAsync();
-            await fileStream.FlushAsync();
+            if (image == null || image.Data == null) return;
+
+            // Create the picker object and set options
+            var savePicker = new Windows.Storage.Pickers.FileSavePicker();
+            savePicker.SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.Desktop;
+            // Dropdown of file types the user can save the file as
+            savePicker.FileTypeChoices.Add("png", new List<string> { ".png" });
+            // Default file name if the user does not type one in or select a file to replace
+            savePicker.SuggestedFileName = suggestedName;
+
+            StorageFile saveFile = await savePicker.PickSaveFileAsync();
+            if (saveFile != null)
+            {
+                using (IRandomAccessStream fileStream = await saveFile.OpenAsync(Windows.Storage.FileAccessMode.ReadWrite))
+                {
+                    // save the image as PNG
+                    BitmapEncoder encode = await BitmapEncoder.CreateAsync(BitmapEncoder.PngEncoderId, fileStream);
+                    byte[] buf = image.Data;
+                    encode.SetPixelData(BitmapPixelFormat.Bgra8, BitmapAlphaMode.Ignore,
+                        (uint)image.Width, (uint)image.Height, 96.0, 96.0, buf);
+                    await encode.FlushAsync();
+                    await fileStream.FlushAsync();
+                }
+            }
         }
-    }
-}
 
         /// <summary>
         /// When a photo is captured in the PhotoCapture scan mode, this method is called.
@@ -335,7 +347,31 @@ public async Task SaveAnylineImageAsync(AnylineImage image, string suggestedName
                 FullFrameImage.Height = bitmap.PixelHeight / 3;
                 FullFrameImage.Visibility = Visibility.Visible;
             }
-        }        
+        }
+
+        /// <summary>
+        /// When a photo is captured in the PhotoCapture scan mode and the PhotoCaptureReturnMode is set to "File", this method is called.
+        /// </summary>
+        /// <param name="file">The StorageFile</param>
+        async void IPhotoCaptureListener.OnPhotoToFile(StorageFile file)
+        {
+            if (file != null)
+            {
+                ImageProperties properties = await file.Properties.GetImagePropertiesAsync();
+                int height = (int)properties.Height;
+                int width = (int)properties.Width;
+                using (var stream = await file.OpenReadAsync())
+                {
+
+                    BitmapImage bitmap = new BitmapImage();
+                    bitmap.SetSource(stream);
+                    FullFrameImage.Source = bitmap;
+                    FullFrameImage.Width = bitmap.PixelWidth / 3;
+                    FullFrameImage.Height = bitmap.PixelHeight / 3;
+                    FullFrameImage.Visibility = Visibility.Visible;
+                }
+            }
+        }
         #endregion
     }
 }

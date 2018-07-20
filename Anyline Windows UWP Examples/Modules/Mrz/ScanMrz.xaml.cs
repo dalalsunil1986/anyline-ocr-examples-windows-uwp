@@ -60,6 +60,8 @@ namespace AnylineExamplesApp.Modules.Mrz
                 AnylineScanView.CancelScanning();
                 AnylineScanView.ReleaseCameraInBackground();
             }
+
+            AnylineScanView.Dispose();
             AnylineScanView = null;
         }
         #endregion
